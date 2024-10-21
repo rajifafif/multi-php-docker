@@ -7,7 +7,7 @@ Easy setup for multi version php using nginx, multiple php-fpm (5.6, 7.4, 8.1), 
 ## Installation
 ```bash
   cd this-project-folder
-  docker compose -d
+  docker-compose up --build -d
 ```
 in this example we link our local ~/www as /var/www, so access to http://localhost will automatically go to ~/www/html.
 
@@ -78,9 +78,13 @@ server {
 After any change in docker-compose.yml, recreate the container
 
 ```bash
-  docker compose down && docker compose up -d
+  docker compose down && docker compose up --build -d
 ```
 
 make sure the port 80 is not used by another service, if there are conflict, you will see the container are not running, use docker gui for easy check.
 
 You can access the phpMyAdmin at http://localhost:6969
+
+
+## NOTES
+Turn out, all app in run with this container has its own localhost or / 127.0.0.1. So to be able to access the PC localhost, we have to point at host.docker.internal.

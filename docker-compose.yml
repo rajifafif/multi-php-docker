@@ -15,28 +15,36 @@ services:
       - php82
 
   php56:
-    image: php:5.6-fpm
+    build:
+      context: .
+      dockerfile: Dockerfile-5.6
     ports:
       - "9056:9000"
     volumes:
       - ~/www:/var/www
 
   php74:
-    image: php:7.4-fpm
+    build:
+      context: .
+      dockerfile: Dockerfile-7.4
     ports:
       - "9074:9000"
     volumes:
       - ~/www:/var/www
 
   php81:
-    image: php:8.1-fpm
+    build:
+      context: .
+      dockerfile: Dockerfile-8.1
     ports:
       - "9081:9000"
     volumes:
       - ~/www:/var/www
 
   php82:
-    image: php:8.2-fpm
+    build:
+      context: .
+      dockerfile: Dockerfile-8.2
     ports:
       - "9084:9000"
     volumes:
@@ -47,7 +55,6 @@ services:
     ports:
       - "6969:80"
     environment:
-      PMA_HOST: host.docker.internal  # Replace with your MySQL host (e.g., localhost or an IP)
-      PMA_USER: root   # Replace with your MySQL user
-      PMA_PASSWORD: password  # Replace with your MySQL password
-    # No need for 'depends_on' for db since it's not included
+      PMA_HOST: host.docker.internal
+      PMA_USER: root
+      PMA_PASSWORD: password
