@@ -1,24 +1,124 @@
 FROM php:7.4-fpm
 
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive \
+    PHP_MEMORY_LIMIT=256M \
+    PHP_MAX_EXECUTION_TIME=60 \
+    PHP_UPLOAD_MAX_FILESIZE=64M \
+    PHP_POST_MAX_SIZE=64M
+
+# Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Core development tools
+    git \
+    unzip \
+    curl \
+    wget \
+    nano \
+    vim \
+    # Image processing libraries
     libzip-dev \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
+    libwebp-dev \
+    # Database and connectivity
+    libpq-dev \
+    libsqlite3-dev \
+    # XML and internationalization
     libxml2-dev \
+    libxslt1-dev \
+    libicu-dev \
+    # Compression and encryption
     zlib1g-dev \
+    libbz2-dev \
     libonig-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-    gd \
-    mysqli \
-    pdo \
-    pdo_mysql \
-    zip \
-    mbstring \
-    opcache \
-    bcmath \
-    intl \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    libssl-dev \
+    # Additional utilities
+    libmagickwand-dev \
+    libmemcached-dev \
+    libgmp-dev \
+    libc-client-dev \
+    libkrb5-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install opcache
+# Configure and install PHP extensions
+RUN docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
+        --with-webp \
+    && docker-php-ext-configure imap \
+        --with-kerberos \
+        --with-imap-ssl \
+    && docker-php-ext-install -j$(nproc) \
+        bcmath \
+        bz2 \
+        calendar \
+        exif \
+        gd \
+        gettext \
+        gmp \
+        imap \
+        intl \
+        mbstring \
+        opcache \
+        pcntl \
+        pdo \
+        pdo_mysql \
+        pdo_pgsql \
+        pdo_sqlite \
+        shmop \
+        soap \
+        sockets \
+        sysvmsg \
+        sysvsem \
+        sysvshm \
+        xsl \
+        zip
+
+# Install PECL extensions
+RUN pecl install \
+        redis \
+        memcached \
+        imagick \
+        xdebug-3.1.6 \
+    && docker-php-ext-enable \
+        redis \
+        memcached \
+        imagick
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Install Node.js 18 (LTS for PHP 7.4 compatibility)
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+
+# Create app directory and set permissions
+RUN mkdir -p /var/www/html \
+    && chown -R www-data:www-data /var/www \
+    && chmod -R 755 /var/www
+
+# Copy optimized PHP configuration
+COPY php74.ini /usr/local/etc/php/conf.d/99-custom.ini
+COPY php-fpm74.conf /usr/local/etc/php-fpm.d/zzz-custom.conf
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Create non-root user for security
+RUN groupadd -r appuser && useradd -r -g appuser appuser \
+    && chown -R appuser:appuser /var/www/html
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD php-fpm -t || exit 1
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
+EXPOSE 9000
+
+# Start PHP-FPM
+CMD ["php-fpm"]

@@ -1,4 +1,4 @@
-FROM php:8.1-fpm
+FROM php:8.4-fpm
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -22,7 +22,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libjpeg-dev \
     libfreetype6-dev \
     libwebp-dev \
-    libavif-dev \
     # Database and connectivity
     libpq-dev \
     libsqlite3-dev \
@@ -38,11 +37,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Additional utilities
     libmagickwand-dev \
     libmemcached-dev \
-    librdkafka-dev \
-    librabbitmq-dev \
-    libgmp-dev \
-    libc-client-dev \
-    libkrb5-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Configure and install PHP extensions
@@ -50,20 +44,14 @@ RUN docker-php-ext-configure gd \
         --with-freetype \
         --with-jpeg \
         --with-webp \
-        --with-avif \
-    && docker-php-ext-configure imap \
-        --with-kerberos \
-        --with-imap-ssl \
     && docker-php-ext-install -j$(nproc) \
-        # Core extensions
+        # Core extensions available in PHP 8.4
         bcmath \
         bz2 \
         calendar \
         exif \
         gd \
         gettext \
-        gmp \
-        imap \
         intl \
         mbstring \
         opcache \
@@ -81,16 +69,19 @@ RUN docker-php-ext-configure gd \
         xsl \
         zip
 
-# Install PECL extensions
+# Install PECL extensions (only stable ones for PHP 8.4)
 RUN pecl install \
         redis \
         memcached \
         imagick \
-        xdebug \
     && docker-php-ext-enable \
         redis \
         memcached \
         imagick
+
+# Install XDebug separately (may not be stable for PHP 8.4 yet)
+RUN pecl install xdebug || echo "XDebug installation failed - PHP 8.4 may not be supported yet" \
+    && (docker-php-ext-enable xdebug || echo "XDebug not enabled")
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -105,8 +96,8 @@ RUN mkdir -p /var/www/html \
     && chmod -R 755 /var/www
 
 # Copy optimized PHP configuration
-COPY php81.ini /usr/local/etc/php/conf.d/99-custom.ini
-COPY php-fpm81.conf /usr/local/etc/php-fpm.d/zzz-custom.conf
+COPY php84.ini /usr/local/etc/php/conf.d/99-custom.ini
+COPY php-fpm84.conf /usr/local/etc/php-fpm.d/zzz-custom.conf
 
 # Set working directory
 WORKDIR /var/www/html

@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Logs
+logs/
+*.log
+
+# Database backups
+backup_*.sql
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node modules
+node_modules/
+npm-debug.log*
+
+# Composer
+vendor/
+composer.lock
+
+# Cache
+.cache/
+tmp/
+temp/
+
+# Documentation
+README.md
+DATABASE-SETUP.md
+*.md
+
+# PHP sessions
+php-sessions/
+
+# MySQL data (handled by volumes)
+mysql80-data/
+
+# Test files
+test-mysql-connection.php
