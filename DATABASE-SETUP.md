@@ -86,11 +86,33 @@ $mysqli = new mysqli('localhost', 'root', 'your_password', 'your_database');
 
 ### Backup & Restore
 ```bash
-# Backup database
+# Backup database (uncompressed)
 ./dev.sh mysql backup php56_test
 
-# Restore database
+# Backup database (compressed)
+./dev.sh mysql backup php56_test gz
+
+# Restore from uncompressed backup
 ./dev.sh mysql restore php56_test backup_file.sql
+
+# Restore from compressed backup
+./dev.sh mysql restore php56_test backup_file.sql.gz
+
+# Import existing SQL file
+./dev.sh mysql import myapp_db existing_dump.sql
+
+# Import compressed SQL file
+./dev.sh mysql import myapp_db large_dump.sql.gz
+
+# Export database
+./dev.sh mysql export myapp_db export_file.sql.gz
+
+# List all databases
+./dev.sh mysql list
+
+# Check database sizes
+./dev.sh mysql size
+./dev.sh mysql size specific_database
 ```
 
 ## phpMyAdmin Access
@@ -121,6 +143,35 @@ The interface will show both database servers:
 - **Initialization Scripts**: `./mysql80-init/`
 - **Connection Test**: `./test-mysql-connection.php`
 - **Data Volume**: Docker managed volume `mysql80_data`
+- **Backups**: Generated in current directory as `backup_*` or `export_*`
+
+## Import/Export Features
+
+### Supported Formats
+- **Uncompressed**: `.sql` files
+- **Compressed**: `.sql.gz` files (automatically detected)
+
+### Import Large Databases
+```bash
+# Import large compressed database
+./dev.sh mysql import production_db large_backup.sql.gz
+
+# Import from external source
+wget https://example.com/database.sql.gz
+./dev.sh mysql import myapp_db database.sql.gz
+```
+
+### Backup Strategies
+```bash
+# Daily backup (compressed)
+./dev.sh mysql backup production_db gz
+
+# Quick backup for development
+./dev.sh mysql backup dev_db
+
+# Export specific database with custom name
+./dev.sh mysql export myapp_db myapp_$(date +%Y%m%d).sql.gz
+```
 
 ## Security Notes
 

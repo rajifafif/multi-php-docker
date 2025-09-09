@@ -1,0 +1,38 @@
+[mysqld]
+# Legacy PHP Applications MySQL Configuration
+# Optimized for compatibility with PHP 5.6 and older applications
+
+# Authentication - Essential for PHP 5.6 compatibility
+default-authentication-plugin=mysql_native_password
+
+# Character Set and Collation
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+
+# Legacy Compatibility Settings
+sql-mode=""  # Relaxed for legacy applications
+secure-file-priv=""
+local-infile=1
+
+# Performance Settings (Moderate)
+innodb-buffer-pool-size=256M
+max-connections=200
+key-buffer-size=32M
+table-open-cache=128
+
+# Logging
+general-log=1
+general-log-file=/var/log/mysql/general.log
+slow-query-log=1
+slow-query-log-file=/var/log/mysql/slow.log
+long-query-time=2
+log-error=/var/log/mysql/error.log
+
+# Legacy MySQL behavior
+explicit-defaults-for-timestamp=OFF
+
+[mysql]
+default-character-set=utf8mb4
+
+[client]
+default-character-set=utf8mb4

@@ -1,0 +1,46 @@
+[mysqld]
+# Production MySQL Configuration
+# Optimized for production performance and security
+
+# Authentication
+default-authentication-plugin=mysql_native_password
+
+# Character Set and Collation
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+
+# Performance Settings (Production)
+innodb-buffer-pool-size=512M
+max-connections=300
+key-buffer-size=64M
+table-open-cache=256
+sort-buffer-size=8M
+net-buffer-length=8K
+read-buffer-size=512K
+read-rnd-buffer-size=1M
+myisam-sort-buffer-size=16M
+
+# Binary Logging
+log-bin=mysql-bin
+binlog-format=ROW
+expire-logs-days=7
+max-binlog-size=100M
+
+# Error Logging Only (Production)
+log-error=/var/log/mysql/error.log
+slow-query-log=1
+slow-query-log-file=/var/log/mysql/slow.log
+long-query-time=5
+
+# Security Settings
+sql-mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO
+secure-file-priv="/var/lib/mysql-files/"
+
+# Performance Schema
+performance-schema=ON
+
+[mysql]
+default-character-set=utf8mb4
+
+[client]
+default-character-set=utf8mb4
