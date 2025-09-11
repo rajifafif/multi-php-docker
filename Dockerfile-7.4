@@ -38,8 +38,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libmagickwand-dev \
     libmemcached-dev \
     libgmp-dev \
-    libc-client-dev \
     libkrb5-dev \
+    libc-client-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Configure and install PHP extensions
@@ -106,19 +106,15 @@ COPY php-fpm74.conf /usr/local/etc/php-fpm.d/zzz-custom.conf
 # Set working directory
 WORKDIR /var/www/html
 
-# Create non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser \
-    && chown -R appuser:appuser /var/www/html
-
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD php-fpm -t || exit 1
 
-# Switch to non-root user
-USER appuser
+# Switch to www-data user
+USER www-data
 
 # Expose port
 EXPOSE 9000
 
 # Start PHP-FPM
-CMD ["php-fpm"]
+CMD ["php-fpm", "-F"]

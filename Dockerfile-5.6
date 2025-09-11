@@ -22,12 +22,24 @@ RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-di
     zip \
     opcache
 
-# Create appuser for better security
-RUN addgroup -g 1000 appuser && \
-    adduser -D -s /bin/sh -u 1000 -G appuser appuser
-
-# Switch to appuser
-USER appuser
+# Create directories and set permissions
+RUN mkdir -p /var/www/html /var/lib/php/sessions \
+    && chown -R www-data:www-data /var/www \
+    && chmod -R 755 /var/www
 
 # Set working directory
 WORKDIR /var/www/html
+
+# Copy custom PHP configuration
+COPY php5.6.ini /usr/local/etc/php/conf.d/99-custom.ini
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD php-fpm -t || exit 1
+
+# Expose port
+EXPOSE 9000
+
+# Start PHP-FPM as www-data
+USER www-data
+CMD ["php-fpm", "-F"]
